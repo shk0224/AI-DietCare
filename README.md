@@ -30,8 +30,6 @@ uv pip install -r requirements.txt
 Run main app:
 uv run python app.py
 
-Run clinical trial file (if needed):
-uv run python clinicaltrial.py
 
 ---
 
