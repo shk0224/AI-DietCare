@@ -1,6 +1,9 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
 from functions.body_metrics import (
     calculate_bmi,
     calculate_bmr_mifflin,
@@ -12,7 +15,15 @@ from functions.body_metrics import (
 from functions.usda_food import search_food, get_food_details
 from functions.diet_guidance import generate_diet_plan
 
+
 app = FastAPI()
+
+# Serve UI
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
+@app.get("/ui")
+def ui():
+    return FileResponse("static/index.html")
 
 
 class DietInput(BaseModel):
@@ -32,7 +43,7 @@ class FoodSearchInput(BaseModel):
 
 @app.get("/")
 def root():
-    return {"message": "Diet API running. Open /docs"}
+    return {"message": "Diet API running. Open /docs or /ui"}
 
 
 @app.post("/food/search")

@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>AI DietCare</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1>AI DietCare</h1>
+      <p class="subtitle">Search foods, view nutrition, and generate an AI diet plan.</p>
+
+      <div class="badge-row">
+        <a class="badge" href="#food">🍌 Food Search</a>
+        <a class="badge" href="#details">🧾 Nutrition Details</a>
+        <a class="badge" href="#diet">🥗 AI Diet Plan</a>
+      </div>
+    </header>
+
+    <main class="grid">
+      <!-- Diet Plan -->
+      <section class="card" id="diet">
+        <h2>AI Diet Plan</h2>
+        <p class="hint">Fill the form to calculate BMI + calories, then get an AI meal plan.</p>
+
+        <form id="dietForm" class="form">
+          <div class="row"><label>Age</label><input type="number" id="age" value="33" min="10" max="120" required /></div>
+          <div class="row"><label>Height (cm)</label><input type="number" id="height_cm" value="167" min="50" max="250" required /></div>
+          <div class="row"><label>Weight (kg)</label><input type="number" id="weight_kg" value="70" min="10" max="300" required /></div>
+
+          <div class="row">
+            <label>Gender</label>
+            <select id="gender">
+              <option value="male" selected>male</option>
+              <option value="female">female</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Activity Level</label>
+            <select id="activity_level">
+              <option value="sedentary">sedentary</option>
+              <option value="light">light</option>
+              <option value="moderate" selected>moderate</option>
+              <option value="high">high</option>
+              <option value="athlete">athlete</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Goal</label>
+            <select id="goal">
+              <option value="loss" selected>lose weight</option>
+              <option value="maintain">maintain</option>
+              <option value="gain">gain muscle</option>
+            </select>
+          </div>
+
+          <div class="row">
+            <label>Preferences</label>
+            <input type="text" id="preferences" placeholder="halal, vegetarian, no pork..." />
+          </div>
+
+          <button class="btn" type="submit">Create My Plan</button>
+        </form>
+
+        <div class="divider"></div>
+
+        <div id="dietStatus" class="status"></div>
+
+        <!-- Summary cards -->
+        <div id="dietSummary" class="summary-grid hidden">
+          <div class="mini-card">
+            <div class="mini-label">BMI</div>
+            <div class="mini-value" id="bmiValue">—</div>
+            <div class="mini-sub" id="bmiTag">—</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Daily Calories</div>
+            <div class="mini-value" id="calValue">—</div>
+            <div class="mini-sub">kcal/day</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Protein Target</div>
+            <div class="mini-value" id="proValue">—</div>
+            <div class="mini-sub">g/day</div>
+          </div>
+          <div class="mini-card">
+            <div class="mini-label">Goal</div>
+            <div class="mini-value" id="goalValue">—</div>
+            <div class="mini-sub" id="tdeeLine">—</div>
+          </div>
+        </div>
+
+        <div class="actions hidden" id="dietActions">
+          <button class="btn-secondary" id="copyPlanBtn" type="button">Copy Plan</button>
+          <button class="btn-secondary" id="downloadJsonBtn" type="button">Download JSON</button>
+        </div>
+
+        <!-- Meal sections -->
+        <div id="mealSections" class="meals hidden">
+          <div class="meal">
+            <h3>Breakfast</h3>
+            <ul id="mealBreakfast"></ul>
+          </div>
+          <div class="meal">
+            <h3>Lunch</h3>
+            <ul id="mealLunch"></ul>
+          </div>
+          <div class="meal">
+            <h3>Dinner</h3>
+            <ul id="mealDinner"></ul>
+          </div>
+          <div class="meal">
+            <h3>Snacks</h3>
+            <ul id="mealSnacks"></ul>
+          </div>
+          <div class="meal">
+            <h3>Hydration</h3>
+            <ul id="mealHydration"></ul>
+          </div>
+          <div class="meal">
+            <h3>Notes</h3>
+            <ul id="mealNotes"></ul>
+          </div>
+        </div>
+
+        <!-- fallback raw json (optional) -->
+        <details class="raw hidden" id="rawBlock">
+          <summary>Show raw JSON (for debugging)</summary>
+          <pre id="dietRaw" class="result"></pre>
+        </details>
+      </section>
+
+      <!-- Food Search -->
+      <section class="card" id="food">
+        <h2>Food Search</h2>
+        <p class="hint">Search USDA foods. Click a result to see nutrition details.</p>
+
+        <form id="foodForm" class="form">
+          <div class="row"><label>Food name</label><input type="text" id="foodQuery" value="banana" required /></div>
+          <div class="row"><label>How many results?</label><input type="number" id="pageSize" value="5" min="1" max="25" /></div>
+
+          <div class="row row-inline">
+            <label class="chk">
+              <input type="checkbox" id="commonOnly" checked />
+              Show common foods only (hide branded)
+            </label>
+          </div>
+
+          <button class="btn" type="submit">Find Foods</button>
+        </form>
+
+        <div class="divider"></div>
+        <div id="foodStatus" class="status"></div>
+
+        <div class="split" id="details">
+          <div>
+            <h3 class="mini-title">Results</h3>
+            <ul id="foodResults" class="list"></ul>
+          </div>
+          <div>
+            <h3 class="mini-title">Nutrition Details</h3>
+            <div id="foodDetailsBox" class="nutri">
+              <div class="nutri-title" id="foodTitle">Click a result to view nutrients</div>
+              <div class="nutri-grid" id="nutriGrid"></div>
+              <pre id="foodDetailsRaw" class="result small hidden"></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>Tip: Keep the server running, then open <b>/docs</b> for API testing.</span>
+    </footer>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
